@@ -1,0 +1,85 @@
+//Problem Link - https://leetcode.com/problems/range-sum-query-mutable/solution/
+
+//Range Sum using SQRT Decomposition
+
+//Solved using sqrt decompostion
+//Time Complexity
+O(n) - pre processing
+O(sqrt(n)) - range sum
+O(1) - update
+space complexity - O(sqrt(n))
+
+Basic idea is to divide the array into the size/sqrt(n) blocks/buckets
+Each block will have sum of its respective blocks.
+
+//While getting range sum:
+1.get startBLock
+2. get endBlock
+3. If startBlock == endBlock (directly do the range sum from start to end)
+4. Else 
+sum1=sum from startIndex till end of start block.
+sum2=sum from startBlock+1 till endBlock -1
+sum3=sum from endBlock till endIndex
+return sum1+sum2+sum3
+
+//Update
+1. Find out the index belongs to which block
+2. update that block sum
+3. Update the actual array.
+
+
+class NumArray {
+    
+    int []nums;
+    int numBuckets;
+    int size;
+    int bucketSum[];
+    
+    public NumArray(int[] nums) {
+        this.nums=nums;
+        this.size=nums.length;
+        double l = Math.sqrt(nums.length);
+        numBuckets=(int)Math.ceil(size/l);
+        bucketSum=new int[numBuckets];
+        for(int i=0;i<size;i++){
+            bucketSum[i/numBuckets]+=nums[i];
+        }
+    }
+    
+    public void update(int i, int val) {
+        int diff=nums[i]-val;
+        bucketSum[i/numBuckets]+=diff;
+        nums[i]=val;
+    }
+    
+    public int sumRange(int i, int j) {
+        int bucket1=i/numBuckets;
+        int bucket2=j/numBuckets;
+        int sum=0;
+        if(bucket1==bucket2){
+            for(int start=i;start<=j;start++){
+                sum+=nums[start];  
+            }
+        }else{
+            for(int var=i;var<(bucket1+1)*numBuckets;var++){
+                sum+=nums[var];
+            }
+            
+            for(int var=(bucket1+1)*numBuckets;var<=(bucket2)*numBuckets-1;var++){
+                sum+=nums[var];
+            }
+            
+            for(int var=(bucket2)*numBuckets;var<=j;var++){
+                sum+=nums[var];
+            }
+        }
+        return sum;
+    }
+}
+
+/**
+ * Your NumArray object will be instantiated and called as such:
+ * NumArray obj = new NumArray(nums);
+ * obj.update(i,val);
+ * int param_2 = obj.sumRange(i,j);
+ */
