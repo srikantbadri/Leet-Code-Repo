@@ -2,6 +2,10 @@
 Link - https://leetcode.com/problems/range-sum-query-mutable/
 --Problem Statement
 -Refer notes for explanation.
+
+- Fenwick Tree also known as Binary Indexed Tree
+- 
+
 Given an integer array nums, find the sum of the elements between indices i and j (i ≤ j), inclusive.
 
 The update(i, val) function modifies nums by updating the element at index i to val.
