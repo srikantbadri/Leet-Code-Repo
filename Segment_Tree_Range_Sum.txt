@@ -1,0 +1,119 @@
+//Implemented using Segment Tree
+Given an integer array nums, find the sum of the elements between indices i and j (i ≤ j), inclusive.
+
+The update(i, val) function modifies nums by updating the element at index i to val.
+
+Example:
+
+Given nums = [1, 3, 5]
+
+sumRange(0, 2) -> 9
+update(1, 2)
+sumRange(0, 2) -> 8
+Note:
+
+The array is only modifiable by the update function.
+You may assume the number of calls to update and sumRange function is distributed evenly.
+____________________________________________________________________________________________________________
+
+
+class NumArray {
+    private int low = 0;
+	private int high = 0;
+	private SegmentTree root = null;
+
+    public class SegmentTree {
+		int val;
+		int start;
+		int end;
+		SegmentTree left;
+		SegmentTree right;
+
+		public SegmentTree(int val, int start, int end, SegmentTree left, SegmentTree right) {
+			super();
+			this.val = val;
+			this.start = start;
+			this.end = end;
+			this.left = left;
+			this.right = right;
+		}
+	}
+
+    public NumArray(int[] nums) {
+		int start = 1;
+		int end = nums.length;
+		SegmentTree root = new SegmentTree(0, start, end, null, null);
+		buildTree(nums, start, end, root);
+		this.root = root;
+		this.low = 1;
+		this.high = nums.length;
+    }
+
+    //initial build tree
+    public int buildTree(int arr[], int start, int end, SegmentTree root) {
+		if (start > end)
+			return 0;
+		//leaf node
+        if (start == end) {
+			root.val = arr[start - 1];
+			return arr[start - 1];
+		}
+		int mid = start + (end - start) / 2;
+		root.left = new SegmentTree(0, start, mid, null, null);
+		root.right = new SegmentTree(0, mid + 1, end, null, null);
+		int retA = buildTree(arr, start, mid, root.left);
+		int retB = buildTree(arr, mid + 1, end, root.right);
+		root.val = retA + retB;
+		return root.val;
+	}
+
+    
+	public void update(int i, int val) {
+		updateQuery(i + 1, val, low, high, root);
+	}
+
+	private int updateQuery(int i, int val, int low, int high, SegmentTree root) {
+		if (root == null)
+			return 0;
+		if (i == low && low == high) {
+			root.val = val;
+			return root.val;
+		}
+		int mid = low + (high - low) / 2;
+		int leftSum = root.left != null ? root.left.val : 0;
+		int rightSum = root.right != null ? root.right.val : 0;
+		if (i <= mid) {
+			leftSum = updateQuery(i, val, low, mid, root.left);
+		} else {
+			rightSum = updateQuery(i, val, mid + 1, high, root.right);
+		}
+		root.val = leftSum + rightSum;
+		return root.val;
+	}
+    
+	public int rangeSumQuery(int qlow, int qhigh, int low, int high, SegmentTree root) {
+		//Total Overlap of low & high
+        if (qlow <= low && qhigh >= high) {
+			return root.val;
+		}
+        //No Overlap
+		if (qlow > high || qhigh < low) {
+			return 0;
+		}
+		int mid = low + (high - low) / 2;
+		int leftVal = rangeSumQuery(qlow, qhigh, low, mid, root.left);
+		int rightVal = rangeSumQuery(qlow, qhigh, mid + 1, high, root.right);
+		return leftVal + rightVal;
+	}
+
+	public int sumRange(int i, int j) {
+		return rangeSumQuery(i + 1, j + 1, low, high, root);
+	}
+}
+
+/**
+ * Your NumArray object will be instantiated and called as such:
+ * NumArray obj = new NumArray(nums);
+ * obj.update(i,val);
+ * int param_2 = obj.sumRange(i,j);
+ */
